@@ -7,6 +7,7 @@
 
 library("tidyverse")
 library("here")
+library("tidyr")
 library("magrittr")
 
 # todo: ----------------
@@ -20,48 +21,16 @@ deaths.data <-
                     "2018-07-27_rgnl_deaths-and-acute-deaths-data-all-communities.csv"))  
 
 
-# Vancouver data: ---------------
-van.deaths <- 
-      deaths.data %>% 
+
+# Group by CommunityRegion2 and nest: ---------------
+deaths.data %<>% 
       set_names(tolower(names(.))) %>% 
-      filter(communityregion2 == "Vancouver") %>% 
-      select(deaths) %>% 
-      ts(start = c(2014, 1),
-          frequency = 4) %>% print
-
-
-van.acutedeaths <- 
-      deaths.data %>% 
-      set_names(tolower(names(.))) %>% 
-      filter(communityregion2 == "Vancouver") %>% 
-      select(acutedeaths) %>% 
-      ts(start = c(2014, 1),
-         frequency = 4) %>% print
-
-
-
-
-# Richmond data: ---------------
-van.deaths <- 
-      deaths.data %>% 
-      set_names(tolower(names(.))) %>% 
-      filter(communityregion2 == "Richmond") %>% 
-      select(deaths) %>% 
-      ts(start = c(2014, 1),
-         frequency = 4) %>% print
-
-
-van.acutedeaths <- 
-      deaths.data %>% 
-      set_names(tolower(names(.))) %>% 
-      filter(communityregion2 == "Richmond") %>% 
-      select(acutedeaths) %>% 
-      ts(start = c(2014, 1),
-         frequency = 4) %>% print
-
+      rename(area = communityregion2, 
+             quarter = deathfiscalquarter) %>%
+      group_by(area) %>% 
+      nest()
       
-
-
-
+deaths.data$data  # all data
+deaths.data$data[[5]]  # Vancouver data 
 
 
