@@ -56,7 +56,9 @@ deaths.data %<>%
 deaths.data$stl.decomp[[1]]
 
 
-# try plotting: 
+
+
+# > plotting trend components: ---------------
 deaths.data$stl.decomp[[5]] %>% 
       as.data.frame() %>% 
       mutate(data = seasonal + trend + remainder, 
@@ -85,29 +87,26 @@ lapply(deaths.data$stl.decomp,
 
 
 
+# alternate way of plotting all: 
+plots <- list()
+
+for (i in 1:5){
+      plots[[i]] <- 
+      deaths.data$stl.decomp[[i]] %>% 
+      as.data.frame() %>% 
+      mutate(data = seasonal + trend + remainder, 
+             timeperiod = seq_along(seasonal)) %>% 
+      
+      ggplot(aes(x = timeperiod, 
+                 y = trend)) + 
+      geom_line(colour = "blue") + 
+      labs(title = paste0(coc.list[i])) + 
+      theme_classic()
+      
+      plots[[i]]
+}
 
 
 
 
-
-
-
-# unnest(deaths.data, deaths.ts) 
-# deaths.data$deaths.ts[[1]]
-
-
-# create a list with all time series: 
-# death.time.series <- list()
-# for (i in seq_along(deaths.data)){
-#       death.time.series[[i]] <- deaths.data$deaths.ts[[i]]
-# }
-# 
-# death.time.series
-# death.time.series[[1]] %>% str
-# death.time.series[[1]] %>% plot()
-# 
-# 
-# lapply(deaths.data$deaths.ts, function(x) {stl(x)})
-# 
-# deaths.data$deaths.ts[[1]] %>% str  # todo: why is this not a univariate time series? 
 
