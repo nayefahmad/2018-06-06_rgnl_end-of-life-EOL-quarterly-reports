@@ -6,12 +6,18 @@
 
 # Function defn: -----------------
 extract_deaths <- 
-      function(df){
+      function(df, colname){
             # df is a single entry (row) of the "data" col of a nested dataframe
+            # colname: either "deaths" or "acute deaths" 
+            
             # output: ts object with deaths data for specified area 
             
+            library("glue")  # see dplyr vignette "Programming" 
+            
+            colname <- as.character(colname)
+            
             deaths.ts <- df %>% 
-                  select(deaths) %>% 
+                  select(glue("{colname}")) %>% 
                   unlist() %>% 
                   as.numeric() %>% 
                   ts(start = c(2014, 1), 
@@ -25,5 +31,5 @@ extract_deaths <-
 
 
 # test fn: 
-extract_deaths(deaths.data$data[[1]]) %>% stl(s.window = "periodic")
-# todo: "Error in stl(.) : only univariate series are allowed" 
+# extract_deaths(df1.deaths.data$data[[1]], "deaths") %>% 
+#       stl(s.window = "periodic")
