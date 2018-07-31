@@ -20,7 +20,7 @@ library("ggpubr")
 # > assign plot names 
 
 
-# read in data: ----------------
+# 1) read in data: ----------------
 source(here("src", 
             "extract_deaths_function.R"))
 source(here("src", 
@@ -34,7 +34,7 @@ df1.deaths.data <-
 
 
 
-# Group by CommunityRegion2 and nest: ---------------
+# 2) Group by CommunityRegion2 and nest: ---------------
 df1.deaths.data %<>% 
       set_names(tolower(names(.))) %>% 
       rename(area = communityregion2, 
@@ -52,7 +52,7 @@ df1.deaths.data$data[[5]]  # Vancouver data
 
 
 
-# add column with deaths as ts object: --------------
+# 3) run STL decompositions: --------------
 df1.deaths.data %<>% 
       # extract ts objects: 
       mutate(deaths.ts = map2(data,  # arg1
@@ -74,28 +74,51 @@ df1.deaths.data$acutedeaths.stl[[5]]
 
 
 
-# plotting trend components: ---------------
+# 4) plotting trend components: ---------------
 p1.trends <- 
       unnest(df1.deaths.data, deaths.stl) %>% 
       as.data.frame() %>% 
       filter(!is.na(area)) %>% 
       
       # create plot: 
-      ggplot(aes(x = timeperiod, 
-                 y = trend)) + 
+      ggplot() + 
       
-      # deaths 
-      geom_line(aes(colour = "Deaths")) +  
+      # deaths trend
+      geom_line(aes(x = timeperiod, 
+                    y = trend,
+                    colour = "Deaths trend"), 
+                size = 1) +  
       
-      # acute deaths: 
+      # deaths data: 
+      geom_line(aes(x = timeperiod, 
+                    y = data,
+                    colour = "Deaths"), 
+                size = 0.1) +
+      
+      
+      # acute deaths trend
       geom_line(data = unnest(df1.deaths.data, acutedeaths.stl) %>% 
                       filter(!is.na(area)), 
-                aes(colour = "Acute Deaths")) + 
+                aes(x = timeperiod, 
+                    y = trend,
+                    colour = "Acute Deaths trend"), 
+                size = 1.0) + 
+      
+      # acutedeaths data: 
+      geom_line(data = unnest(df1.deaths.data, acutedeaths.stl) %>% 
+                      filter(!is.na(area)), 
+                aes(x = timeperiod, 
+                    y = data,
+                    colour = "Acute Deaths"), 
+                size = 0.1) +
       
       facet_wrap(~area) + 
       
       
-      scale_color_manual(values = c("red", "black")) + 
+      scale_color_manual(values = c("lightpink", 
+                                    "red", 
+                                    "grey80", 
+                                    "black")) + 
       labs(title = "Trend components of deaths and acute deaths, by COC",
            subtitle = "2014-Q1 to 2018-Q1", 
            y = "number of deaths") + 
@@ -105,7 +128,7 @@ p1.trends <-
       
  
 
-# plotting seasonal components: ---------------
+# 5) plotting seasonal components: ---------------
 p2.seasonal <- 
       unnest(df1.deaths.data, deaths.stl) %>% 
       as.data.frame() %>% 
@@ -124,7 +147,8 @@ p2.seasonal <-
                 aes(colour = "Acute Deaths")) + 
       
       geom_hline(yintercept = 0, 
-                 colour = "grey70") + 
+                 colour = "grey70", 
+                 size = 0.2) + 
       
       facet_wrap(~area) + 
       
@@ -146,7 +170,9 @@ p2.seasonal <-
 
 
 #**************************************************************************
-# write outputs: -------------------------
+# 5) write outputs: -------------------------
+#**************************************************************************
+
 pdf(here("results", 
             "output from src", 
             "2018-07-31_rgnl_eol-deaths-trend-and-seasonal-components.pdf"))
