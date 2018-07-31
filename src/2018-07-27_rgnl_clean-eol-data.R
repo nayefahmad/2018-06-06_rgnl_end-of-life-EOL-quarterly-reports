@@ -9,11 +9,12 @@ library("tidyverse")
 library("here")
 library("tidyr")
 library("magrittr")
+library("ggpubr")
 
 # todo: ----------------
-# > use nest( ) and pmap() to apply fn over each community, get list-columns 
-#      with the required data 
 
+
+# read in data: ----------------
 source(here("src", 
             "extract_deaths_function.R"))
 
@@ -25,7 +26,7 @@ deaths.data <-
 
 
 
-# > Group by CommunityRegion2 and nest: ---------------
+# Group by CommunityRegion2 and nest: ---------------
 deaths.data %<>% 
       set_names(tolower(names(.))) %>% 
       rename(area = communityregion2, 
@@ -43,7 +44,7 @@ deaths.data$data[[5]]  # Vancouver data
 
 
 
-# > add column with deaths as ts object: --------------
+# add column with deaths as ts object: --------------
 deaths.data %<>% 
       mutate(deaths.ts = map(data, extract_deaths)) %>% 
       mutate(stl.decomp = map(deaths.ts, function(x) {
@@ -58,39 +59,18 @@ deaths.data$stl.decomp[[1]]
 
 
 
-# > plotting trend components: ---------------
-deaths.data$stl.decomp[[5]] %>% 
-      as.data.frame() %>% 
-      mutate(data = seasonal + trend + remainder, 
-             timeperiod = seq_along(seasonal)) %>% 
-      ggplot(aes(x = timeperiod, 
-                 y = trend)) + 
-            geom_line()
-
-
+# plotting trend components: ---------------
+# deaths.data$stl.decomp[[5]] %>% 
+#       as.data.frame() %>% 
+#       mutate(data = seasonal + trend + remainder, 
+#              timeperiod = seq_along(seasonal)) %>% 
+#       ggplot(aes(x = timeperiod, 
+#                  y = trend)) + 
+#             geom_line()
+# 
 
 
 # use for loop to plot each COC: 
-coc.list <- unique(deaths.data$area)
-
-
-lapply(deaths.data$stl.decomp, 
-       function(x){
-             x %>% as.data.frame() %>% 
-                   mutate(data = seasonal + trend + remainder, 
-                          timeperiod = seq_along(seasonal)) %>% 
-                   ggplot(aes(x = timeperiod, 
-                              y = trend)) + 
-                   geom_line() + 
-                   labs(title = paste0())
-       })
-
-
-
-
-
-
-# alternate way of plotting all: 
 plots <- list()
 
 # names for plot titles: 
@@ -104,6 +84,7 @@ plot.fn <- function(df){
       ggplot(aes(x = timeperiod, 
                  y = trend)) + 
       geom_line(colour = "dodgerblue") + 
+      scale_y_continuous(limits = c(0, 1000)) + 
       labs(title = paste0(coc.list[i])) + 
       theme_classic()
 }
@@ -122,6 +103,10 @@ for (i in 1:5){
 print(plots)
 plots[[5]]
 
+ggarrange(plots[[2]], 
+          plots[[3]], 
+          plots[[4]], 
+          plots[[5]])
 # todo: why not just facet them? 
 
 
