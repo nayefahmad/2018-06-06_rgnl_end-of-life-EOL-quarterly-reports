@@ -75,6 +75,20 @@ df1.deaths.data$acutedeaths.stl[[5]]
 
 
 # 4) plotting trend components: ---------------
+
+# first identify breaks for x-axis: 
+x.breaks <- 
+      unnest(df1.deaths.data, acutedeaths.stl) %>% 
+      select(timeperiod) %>%
+      unique() %>%
+      mutate(test = timeperiod %% 4) %>% 
+      filter(test == 0) %>% 
+      select(timeperiod) %>% 
+      unname %>%
+      unlist
+
+
+
 p1.trends <- 
       unnest(df1.deaths.data, deaths.stl) %>% 
       as.data.frame() %>% 
@@ -119,10 +133,13 @@ p1.trends <-
                                     "red", 
                                     "grey80", 
                                     "black")) + 
+      scale_x_continuous(breaks = x.breaks) + 
+      
       labs(title = "Trend components of deaths and acute deaths, by COC",
            subtitle = "2014-Q1 to 2018-Q1", 
-           y = "number of deaths") + 
-      guides(colour = guide_legend("")) + 
+           y = "number of deaths", 
+           x = "quarter") + 
+      guides(colour = guide_legend("")) +  # remove legend title
       
       theme_classic(base_size = 12); p1.trends
       
@@ -156,8 +173,11 @@ p2.seasonal <-
       scale_color_manual(values = c("red", "black")) + 
       labs(title = "Seasonal components of deaths and acute deaths, by COC",
            subtitle = "2014-Q1 to 2018-Q1",
-           y = "number of deaths") + 
-      guides(colour = guide_legend("")) + 
+           y = "number of deaths", 
+           x = "quarter") + 
+      scale_x_continuous(breaks = x.breaks) + 
+      
+      guides(colour = guide_legend("")) +  # remove legend title
       
       theme_classic(base_size = 12); p2.seasonal
 
