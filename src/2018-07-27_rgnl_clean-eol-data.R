@@ -87,26 +87,41 @@ lapply(deaths.data$stl.decomp,
 
 
 
+
+
+
 # alternate way of plotting all: 
 plots <- list()
 
+# names for plot titles: 
+coc.list <- unique(deaths.data$area)
+
+# define plotting function: 
+plot.fn <- function(df){
+      df %>% 
+      mutate(data = seasonal + trend + remainder, 
+              timeperiod = seq_along(seasonal)) %>% 
+      ggplot(aes(x = timeperiod, 
+                 y = trend)) + 
+      geom_line(colour = "dodgerblue") + 
+      labs(title = paste0(coc.list[i])) + 
+      theme_classic()
+}
+
+
+# apply fn in loop: 
 for (i in 1:5){
       plots[[i]] <- 
       deaths.data$stl.decomp[[i]] %>% 
       as.data.frame() %>% 
-      mutate(data = seasonal + trend + remainder, 
-             timeperiod = seq_along(seasonal)) %>% 
+      plot.fn() 
       
-      ggplot(aes(x = timeperiod, 
-                 y = trend)) + 
-      geom_line(colour = "blue") + 
-      labs(title = paste0(coc.list[i])) + 
-      theme_classic()
-      
-      plots[[i]]
 }
 
+# view plots: 
+print(plots)
+plots[[5]]
 
-
+# todo: why not just facet them? 
 
 
