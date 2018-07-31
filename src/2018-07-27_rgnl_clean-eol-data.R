@@ -11,20 +11,23 @@ library("tidyr")
 library("magrittr")
 library("ggpubr")
 
+# rm(list = ls())
+
 # todo: ----------------
 # > add acute.deaths lines in the graphs, by COC 
 # > rename col stl.decomp to deaths.stl; add new col acutedeaths.stl 
 # > fix x-axis of graphs 
-# > rename dataframes: df1...., df2..., etc. 
 # > assign plot names 
 
 
 # read in data: ----------------
 source(here("src", 
             "extract_deaths_function.R"))
+source(here("src", 
+            "stl_function.R"))
 
 
-deaths.data <- 
+df1.deaths.data <- 
       read_csv(here("results", 
                     "output from src", 
                     "2018-07-27_rgnl_deaths-and-acute-deaths-data-all-communities.csv"))  
@@ -32,7 +35,7 @@ deaths.data <-
 
 
 # Group by CommunityRegion2 and nest: ---------------
-deaths.data %<>% 
+df1.deaths.data %<>% 
       set_names(tolower(names(.))) %>% 
       rename(area = communityregion2, 
              quarter = deathfiscalquarter) %>%
@@ -42,55 +45,119 @@ deaths.data %<>%
 # each entry of deaths.data$data is a dataframe, which is nested within the 
 # deaths.data dataframe 
 
-deaths.data$data  # all data
-deaths.data$data[[5]]  # Vancouver data 
+df1.deaths.data$data  # all data
+df1.deaths.data$data[[5]]  # Vancouver data 
 
 
 
 
 
 # add column with deaths as ts object: --------------
-deaths.data %<>% 
-      mutate(deaths.ts = map(data, extract_deaths)) %>% 
-      mutate(stl.decomp = map(deaths.ts, function(x) {
-                  stl <- stl(x, s.window = "periodic")
-                  
-                  stl.df <- stl[[1]] %>% as.data.frame() %>% 
-                        mutate(data = seasonal + trend + remainder, 
-                               timeperiod = seq_along(seasonal))
-                  
-                  return(stl.df)
-                  }
-            ))
+df1.deaths.data %<>% 
+      # extract ts objects: 
+      mutate(deaths.ts = map2(data,  # arg1
+                              "deaths", # arg2
+                              extract_deaths), 
+             acutedeaths.ts = map2(data, 
+                                   "acutedeaths", 
+                                   extract_deaths)) %>% 
+      
+      
+      
+      # run stl decompositions: 
+      mutate(deaths.stl = map(deaths.ts, stl.fn), 
+             acutedeaths.stl = map(acutedeaths.ts, stl.fn))
 
 # result: 
-deaths.data$stl.decomp[[5]]
-
+df1.deaths.data$deaths.stl[[5]]
+df1.deaths.data$acutedeaths.stl[[5]]
 
 
 
 # plotting trend components: ---------------
-# deaths.data$stl.decomp[[5]] %>% 
-#       as.data.frame() %>% 
-#       mutate(data = seasonal + trend + remainder, 
-#              timeperiod = seq_along(seasonal)) %>% 
-#       ggplot(aes(x = timeperiod, 
-#                  y = trend)) + 
-#             geom_line()
-# 
-
-unnest(deaths.data, stl.decomp) %>% 
+p1.trends <- 
+      unnest(df1.deaths.data, deaths.stl) %>% 
       as.data.frame() %>% 
       filter(!is.na(area)) %>% 
+      
+      # create plot: 
       ggplot(aes(x = timeperiod, 
                  y = trend)) + 
-      geom_line() + 
+      
+      # deaths 
+      geom_line(aes(colour = "Deaths")) +  
+      
+      # acute deaths: 
+      geom_line(data = unnest(df1.deaths.data, acutedeaths.stl) %>% 
+                      filter(!is.na(area)), 
+                aes(colour = "Acute Deaths")) + 
+      
       facet_wrap(~area) + 
-      labs(title = "Trend Component of deaths, by COC") + 
-      theme_classic(base_size = 16)
       
       
+      scale_color_manual(values = c("red", "black")) + 
+      labs(title = "Trend components of deaths and acute deaths, by COC",
+           subtitle = "2014-Q1 to 2018-Q1", 
+           y = "number of deaths") + 
+      guides(colour = guide_legend("")) + 
       
+      theme_classic(base_size = 12); p1.trends
+      
+ 
+
+# plotting seasonal components: ---------------
+p2.seasonal <- 
+      unnest(df1.deaths.data, deaths.stl) %>% 
+      as.data.frame() %>% 
+      filter(!is.na(area)) %>% 
+      
+      # create plot: 
+      ggplot(aes(x = timeperiod, 
+                 y = seasonal)) + 
+      
+      # deaths 
+      geom_line(aes(colour = "Deaths")) +  
+      
+      # acute deaths: 
+      geom_line(data = unnest(df1.deaths.data, acutedeaths.stl) %>% 
+                      filter(!is.na(area)), 
+                aes(colour = "Acute Deaths")) + 
+      
+      geom_hline(yintercept = 0, 
+                 colour = "grey70") + 
+      
+      facet_wrap(~area) + 
+      
+      
+      scale_color_manual(values = c("red", "black")) + 
+      labs(title = "Seasonal components of deaths and acute deaths, by COC",
+           subtitle = "2014-Q1 to 2018-Q1",
+           y = "number of deaths") + 
+      guides(colour = guide_legend("")) + 
+      
+      theme_classic(base_size = 12); p2.seasonal
+
+
+
+
+
+
+
+
+
+#**************************************************************************
+# write outputs: -------------------------
+pdf(here("results", 
+            "output from src", 
+            "2018-07-31_rgnl_eol-deaths-trend-and-seasonal-components.pdf"))
+p1.trends
+p2.seasonal
+dev.off()
+   
+      
+
+
+
 
 
 
