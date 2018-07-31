@@ -14,6 +14,9 @@ library("ggpubr")
 # todo: ----------------
 # > add acute.deaths lines in the graphs, by COC 
 # > rename col stl.decomp to deaths.stl; add new col acutedeaths.stl 
+# > fix x-axis of graphs 
+# > rename dataframes: df1...., df2..., etc. 
+# > assign plot names 
 
 
 # read in data: ----------------
@@ -83,7 +86,8 @@ unnest(deaths.data, stl.decomp) %>%
                  y = trend)) + 
       geom_line() + 
       facet_wrap(~area) + 
-      theme_classic()
+      labs(title = "Trend Component of deaths, by COC") + 
+      theme_classic(base_size = 16)
       
       
       
