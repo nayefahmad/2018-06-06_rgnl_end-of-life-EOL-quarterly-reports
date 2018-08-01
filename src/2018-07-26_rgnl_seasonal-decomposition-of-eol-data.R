@@ -27,7 +27,7 @@ library("reshape2")
 
 # 2) deaths data: --------------
 # read data from excel sheet: 
-deaths <- readClipboard() %>% 
+deaths <- readClipboard() %>%  # read in e.g. Vancouver data 
       as.numeric() %>% 
       ts(start = c(2014, 1),
          frequency = 4)
