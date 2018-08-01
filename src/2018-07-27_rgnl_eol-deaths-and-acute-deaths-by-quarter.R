@@ -9,16 +9,14 @@ library("tidyverse")
 library("here")
 library("tidyr")
 library("magrittr")
-library("ggpubr")
+library("reshape2")
+
 
 # rm(list = ls())
 
 # todo: ----------------
-# > add acute.deaths lines in the graphs, by COC 
-# > rename col stl.decomp to deaths.stl; add new col acutedeaths.stl 
 # > fix x-axis of graphs 
-# > assign plot names 
-
+# > create plot p3.1 ==> for VCH as a whole 
 
 # 1) read in data: ----------------
 source(here("src", 
@@ -26,11 +24,18 @@ source(here("src",
 source(here("src", 
             "stl_function.R"))
 
-
+# deaths data: 
 df1.deaths.data <- 
       read_csv(here("results", 
                     "output from src", 
                     "2018-07-27_rgnl_deaths-and-acute-deaths-data-all-communities.csv"))  
+
+# measure targets: 
+df2.targets <- 
+      read_csv(here("data", 
+                    "2018-07-31_rgnl_eol-acute-deaths-percentage-targets.csv"))
+
+
 
 
 
@@ -39,12 +44,17 @@ df1.deaths.data %<>%
       set_names(tolower(names(.))) %>% 
       rename(area = communityregion2, 
              quarter = deathfiscalquarter) %>%
+      inner_join(df2.targets) %>%  # join on area and quarter to get targets 
+      
+      # calculate measure: 
+      mutate(measure = round(acutedeaths/deaths, 2)) %>% 
       group_by(area) %>% 
       nest()
 
 # each entry of deaths.data$data is a dataframe, which is nested within the 
 # deaths.data dataframe 
 
+# examine data: 
 df1.deaths.data$data  # all data
 df1.deaths.data$data[[5]]  # Vancouver data 
 
@@ -57,16 +67,16 @@ df1.deaths.data %<>%
       # extract ts objects: 
       mutate(deaths.ts = map2(data,  # arg1
                               "deaths", # arg2
-                              extract_deaths), 
+                              extract_deaths),           # custom function for extracting deaths data as ts object 
              acutedeaths.ts = map2(data, 
                                    "acutedeaths", 
-                                   extract_deaths)) %>% 
+                                   extract_deaths)) %>%  # custom function for extracting deaths data as ts object 
       
       
       
       # run stl decompositions: 
-      mutate(deaths.stl = map(deaths.ts, stl.fn), 
-             acutedeaths.stl = map(acutedeaths.ts, stl.fn))
+      mutate(deaths.stl = map(deaths.ts, stl.fn),            # custom function for returning stl components as dataframe  
+             acutedeaths.stl = map(acutedeaths.ts, stl.fn))  # custom function for returning stl components as dataframe 
 
 # result: 
 df1.deaths.data$deaths.stl[[5]]
@@ -74,9 +84,9 @@ df1.deaths.data$acutedeaths.stl[[5]]
 
 
 
-# 4) plotting trend components: ---------------
 
-# first identify breaks for x-axis: 
+# 4) Identify text for plots: ----------------------
+# first identify breaks for x-axis (multiples of 4 until max num quarters): 
 x.breaks <- 
       unnest(df1.deaths.data, acutedeaths.stl) %>% 
       select(timeperiod) %>%
@@ -87,8 +97,16 @@ x.breaks <-
       unname %>%
       unlist
 
+# next find min and max quarter for subtitle: 
+df3.quarters <- 
+      unnest(df1.deaths.data, data) %>% select(quarter) %>% unique()
+
+min.quarter <-  df3.quarters %>% filter(row_number() == 1) %>% as.character()
+max.quarter <-  df3.quarters %>% filter(row_number() == nrow(df3.quarters)) %>% as.character()
 
 
+
+# 5) plotting trend components: ---------------
 p1.trends <- 
       unnest(df1.deaths.data, deaths.stl) %>% 
       as.data.frame() %>% 
@@ -136,7 +154,7 @@ p1.trends <-
       scale_x_continuous(breaks = x.breaks) + 
       
       labs(title = "Trend components of deaths and acute deaths, by COC",
-           subtitle = "2014-Q1 to 2018-Q1", 
+           subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "number of deaths", 
            x = "quarter") + 
       guides(colour = guide_legend("")) +  # remove legend title
@@ -145,7 +163,7 @@ p1.trends <-
       
  
 
-# 5) plotting seasonal components: ---------------
+# 6) plotting seasonal components: ---------------
 p2.seasonal <- 
       unnest(df1.deaths.data, deaths.stl) %>% 
       as.data.frame() %>% 
@@ -172,7 +190,7 @@ p2.seasonal <-
       
       scale_color_manual(values = c("red", "black")) + 
       labs(title = "Seasonal components of deaths and acute deaths, by COC",
-           subtitle = "2014-Q1 to 2018-Q1",
+           subtitle = paste0(min.quarter, " to ", max.quarter),
            y = "number of deaths", 
            x = "quarter") + 
       scale_x_continuous(breaks = x.breaks) + 
@@ -187,10 +205,57 @@ p2.seasonal <-
 
 
 
+# 7) plotting measure values: ----------------
+p3.measures.and.targets <- 
+      unnest(df1.deaths.data, data) %>% 
+      filter(!is.na(area)) %>% 
+      melt %>% 
+      filter(variable %in% c("measure", "target")) %>% 
+      
+      ggplot(aes(x = quarter, 
+                 y = value, 
+                 group = variable)) + 
+      geom_line(aes(colour = variable), 
+                size = 1) + 
+      
+      facet_wrap(~area) + 
+      
+      # scales: 
+      scale_colour_manual(values = c("grey60",
+                                     "dodgerblue")) + 
+      scale_y_continuous(limits = c(0, 1.0), 
+                         breaks = seq(0, 1, 0.1)) + 
+      scale_x_discrete(breaks = c("14-Q1", 
+                                  "15-Q1", 
+                                  "16-Q1", 
+                                  "17-Q1", 
+                                  "18-Q1")) +
+      
+      # labs: 
+      labs(title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community programs", 
+           subtitle = paste0(min.quarter, " to ", max.quarter), 
+           y = "proportion") + 
+      
+      guides(colour = guide_legend("")) +  # remove legend title
+      
+      
+      theme_classic(base_size = 12); p3.measures.and.targets
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #**************************************************************************
-# 5) write outputs: -------------------------
+# 8) write outputs: -------------------------
 #**************************************************************************
 
 pdf(here("results", 
