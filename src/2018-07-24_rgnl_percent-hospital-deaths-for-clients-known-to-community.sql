@@ -1,13 +1,18 @@
 
 
---------------------------------------------------------
--- EOL INDICATOR: Percent of Overall Hospital Deaths for Clients Known to VCH Community Program
---------------------------------------------------------
+/*--------------------------------------------------------
+-- EOL INDICATORs: 
+> Percent of Overall Hospital Deaths for Clients Known to VCH Community Program
+> Avg hospital days in the last 6 months of life 
+--------------------------------------------------------*/
 
 -- cleanup 
 if object_id('tempdb.dbo.#deathsInAcute') is not null drop table #deathsInAcute; 
 
 
+
+
+--pull all deaths in acute: 
 select [PatientID]
       ,[SourceSystemClientID]
       ,[AcuteServiceID]
@@ -64,3 +69,26 @@ select [PatientID]
 
 into #deathsInAcute
 from [CommunityMart].[dbo].[vwEndOfLife]
+
+
+-- group by quarter 
+select *
+	--, ((AcuteDeaths*1.0)/Deaths) * 100 as reportedMeasure   --todo: for some reason division give inaccurate result :/
+from(
+
+	select CommunityRegion2
+		 ,DeathFiscalQuarter 
+		, count(patientID) as Deaths 
+		, sum(cast(isdeathinacute as int)) as AcuteDeaths
+		, sum(dadacutedaylast6month) as AdjLOSDays
+	from #deathsInAcute
+	where 1=1 
+		and IsKnownToCommunity = 1
+		and CommunityRegion2 <> ' '			-- params: select area
+		and DeathFiscalQuarter between '14-Q1' and '18-Q1' 
+	group by DeathFiscalQuarter 
+		, CommunityRegion2
+	) as sub
+order by CommunityRegion2
+	 , DeathFiscalQuarter; 
+
