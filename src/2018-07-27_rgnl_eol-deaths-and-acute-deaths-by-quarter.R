@@ -107,6 +107,9 @@ x.breaks <-
       unname %>%
       unlist
 
+quarter.labels <- unnest(df1.deaths.data, data) %>% select(quarter) %>% as.data.frame()
+quarter.labels <- quarter.labels[c(1, x.breaks+1), ]
+
 # next find min and max quarter for subtitle: 
 df3.quarters <- 
       unnest(df1.deaths.data, data) %>% select(quarter) %>% unique()
@@ -123,46 +126,56 @@ p1.trends <-
       as.data.frame() %>% 
       filter(!is.na(area)) %>% 
       
+      # join to get quarter numbers: 
+      inner_join(unnest(df1.deaths.data, data)) %>% 
+      
       # create plot: 
       ggplot() + 
       
       # deaths trend
-      geom_line(aes(x = timeperiod, 
+      geom_line(aes(x = quarter, 
                     y = trend,
-                    colour = "Deaths trend"), 
+                    colour = "Deaths trend", 
+                    group = 1), 
                 size = 1) +  
       
+      facet_wrap(~area) + 
+      
       # deaths data: 
-      geom_line(aes(x = timeperiod, 
+      geom_line(aes(x = quarter, 
                     y = data,
-                    colour = "Deaths"), 
+                    colour = "Deaths", 
+                    group = 1), 
                 size = 0.1) +
       
       
       # acute deaths trend
       geom_line(data = unnest(df1.deaths.data, acutedeaths.stl) %>% 
-                      filter(!is.na(area)), 
-                aes(x = timeperiod, 
+                      filter(!is.na(area)) %>% 
+                      inner_join(unnest(df1.deaths.data, data)), 
+                aes(x = quarter, 
                     y = trend,
-                    colour = "Acute Deaths trend"), 
+                    colour = "Acute Deaths trend", 
+                    group = 1), 
                 size = 1.0) + 
       
       # acutedeaths data: 
       geom_line(data = unnest(df1.deaths.data, acutedeaths.stl) %>% 
-                      filter(!is.na(area)), 
-                aes(x = timeperiod, 
+                      filter(!is.na(area)) %>% 
+                      inner_join(unnest(df1.deaths.data, data)),  
+                aes(x = quarter, 
                     y = data,
-                    colour = "Acute Deaths"), 
+                    colour = "Acute Deaths",
+                    group = 1), 
                 size = 0.1) +
       
-      facet_wrap(~area) + 
       
-      
+      # scaless:
       scale_color_manual(values = c("lightpink", 
                                     "red", 
                                     "grey80", 
                                     "black")) + 
-      scale_x_continuous(breaks = x.breaks) + 
+      scale_x_discrete(breaks = quarter.labels) + 
       
       labs(title = "Deaths and acute deaths, by COC",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
