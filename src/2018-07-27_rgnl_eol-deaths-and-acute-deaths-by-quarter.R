@@ -15,14 +15,15 @@ library("reshape2")
 # rm(list = ls())
 
 # todo: ----------------
-# > fix x-axis of graphs p1, p2
+# > fix x-axis of graphs p1, p2, p5, p6
 # > fix order of labels in legend 
-# > add data sources, key contacts 
+# > add data sources, key contacts as captions 
+# > parametrize start year and quarter (hardcoded to 2014, 1 for now in extract_ts() fn)
 
 
 # 1) read in data and functions: ----------------
 source(here("src", 
-            "extract_deaths_function.R"))
+            "extract_ts_function.R"))
 source(here("src", 
             "stl_function.R"))
 
@@ -215,7 +216,7 @@ p2.seasonal <-
 
 
 
-# 7) plotting measure values: ----------------
+# 7) plotting measure values: % acute deaths ----------------
 p3.measures.and.targets <- 
       # prep data: 
       unnest(df1.deaths.data, data) %>% 
@@ -303,10 +304,10 @@ p3.1.measures.and.targets.vch <-
 
 
 #**************************************************************************
-# 8) AVG ACUTE LOS DAYS IN LAST 6MONTHS OF LIFE : -------------------------
+# 8) plotting measure values: Avg LOS days  : -------------------------
 #**************************************************************************
 
-p4.acute.losdays <- 
+p4.acute.losdays.measure.and.target <- 
       # prep data: 
       unnest(df1.deaths.data, data) %>% 
       select(-c(measure, target)) %>%  # remove "measure" and "target" cols for indicator "%acute deaths"
@@ -328,7 +329,7 @@ p4.acute.losdays <-
       scale_colour_manual(values = c("firebrick",
                                      "grey60")) + 
       
-      expand_limits(y = 0) +  # display y-axis starting at 0, without specifying 
+      expand_limits(y = 0) +  # display y-axis starting at 0, without specifying max
 
       scale_x_discrete(breaks = c("14-Q1", 
                                   "15-Q1", 
@@ -337,26 +338,146 @@ p4.acute.losdays <-
                                   "18-Q1")) +
       
       # labs: 
-      labs(title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community \nprograms", 
+      labs(title = "Regional End of Life Reporting \nAverage hospital days in the last 6 months of life for clients known to \nVCH Community Programs", 
            subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "proportion") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
       
-      theme_classic(base_size = 12); p4.acute.losdays      
+      theme_classic(base_size = 12); p4.acute.losdays.measure.and.target
+
+
+
+# > VCH-LEVEL GRAPH: ----------
+p4.1.acute.losdays.measure.and.target.vch <- 
+      # prep data: 
+      unnest(df1.deaths.data, data) %>% 
+      filter(!is.na(area)) %>%
+      group_by(quarter) %>%
+      summarize(deaths = sum(deaths), 
+                losdays = sum(adjlosdays)) %>% 
+      mutate(measure = round(losdays/deaths, 2), 
+             area = "VCH") %>% 
+      inner_join(df3.los.targets) %>%
+      melt %>% 
+      filter(variable %in% c("measure", "target")) %>% 
+      
+      # plot
+      ggplot(aes(x = quarter, 
+                 y = value, 
+                 group = variable)) + 
+      geom_line(aes(colour = variable), 
+                size = 1) + 
+      
+      # scales: 
+      scale_colour_manual(values = c("firebrick",
+                                     "grey60")) + 
+      expand_limits(y = 0) +  # display y-axis starting at 0, without specifying max
+      
+      scale_x_discrete(breaks = c("14-Q1", 
+                                  "15-Q1", 
+                                  "16-Q1", 
+                                  "17-Q1", 
+                                  "18-Q1")) +
+      
+      # labs: 
+      labs(title = "Regional End of Life Reporting \nAverage hospital days in the last 6 months of life for clients known to \nVCH Community Programs", 
+           subtitle = paste0(min.quarter, " to ", max.quarter, " for VCH as a whole"), 
+           y = "proportion") + 
+      
+      guides(colour = guide_legend("")) +  # remove legend title
+      
+      
+      theme_classic(base_size = 12); p4.1.acute.losdays.measure.and.target.vch
+      
+
+
+
+#**************************************************************************
+# 9) trend of LOSdays: -------------------------
+#**************************************************************************
+
+p5.losdays.trend <- 
+      # prep data: 
+      unnest(df1.deaths.data, losdays.stl) %>% 
+      as.data.frame() %>% 
+      filter(!is.na(area)) %>% 
+      
+      # plot data: 
+      ggplot() + 
+      
+      # los trend
+      geom_line(aes(x = timeperiod, 
+                    y = trend, 
+                    colour = "LOS days trend"), 
+                size = 1) +
+      
+      # los data: 
+      geom_line(aes(x = timeperiod, 
+                    y = data, 
+                    colour = "LOS days"), 
+                size = 0.1) +
+      
+      facet_wrap(~area) + 
+      
+      
+      scale_color_manual(values = c("grey80", 
+                                    "black")) + 
+      scale_x_continuous(breaks = x.breaks) + 
+      
+      labs(title = "Total hospital days in last 6 months of life, for clients known to \nVCH Community Programs",
+           subtitle = paste0(min.quarter, " to ", max.quarter), 
+           y = "number of days", 
+           x = "quarter") + 
+      guides(colour = guide_legend("")) +  # remove legend title
+      
+      theme_classic(base_size = 12); p5.losdays.trend
 
 
 
 
+# 10) seasonality of losdays: ---------
+p6.losdays.seasonal <- 
+      # prep data: 
+      unnest(df1.deaths.data, losdays.stl) %>% 
+      as.data.frame() %>% 
+      filter(!is.na(area)) %>% 
+      
+      # plot data: 
+      ggplot() + 
+      
+      # los trend
+      geom_line(aes(x = timeperiod, 
+                    y = seasonal, 
+                    colour = "LOS days trend")) +
+      
+      facet_wrap(~area) + 
+      
+      scale_color_manual(values = c("black")) + 
+      scale_x_continuous(breaks = x.breaks) + 
+      geom_hline(yintercept = 0, 
+                 colour = "grey70", 
+                 size = 0.2) + 
+      
+      
+      labs(title = "Seasonal component of total hospital days in last 6 months of life \nfor clients known to VCH Community Programs",
+           subtitle = paste0(min.quarter, " to ", max.quarter), 
+           y = "number of days", 
+           x = "quarter") + 
+      guides(colour = guide_legend("")) +  # remove legend title
+      
+      theme_classic(base_size = 12); p6.losdays.seasonal
+      
 
 
+      
 
 
 
 
 
 #**************************************************************************
-# 9) write outputs: -------------------------
+# 10) write outputs: -------------------------
 #**************************************************************************
 
 pdf(here("results", 
@@ -370,6 +491,14 @@ dev.off()
    
       
 
+pdf(here("results", 
+         "output from src", 
+         "2018-08-02_rgnl_eol-reporting_los-days-in-acute-last-six-months.pdf"))
+p4.1.acute.losdays.measure.and.target.vch
+p4.acute.losdays
+p5.losdays.trend
+p6.losdays.seasonal
+dev.off()
 
 
 
