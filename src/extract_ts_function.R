@@ -33,5 +33,5 @@ extract_ts <-
 
 
 # test fn: 
-extract_ts(df1.deaths.data$data[[1]], "deaths") %>%
-      stl(s.window = "periodic")
+# extract_ts(df1.deaths.data$data[[1]], "deaths") %>%
+#       stl(s.window = "periodic")

@@ -54,6 +54,7 @@ df1.deaths.data %<>%
       # calculate measure: 
       mutate(measure = round(acutedeaths/deaths, 2)) %>% 
       group_by(area) %>% 
+      mutate(timeperiod = row_number()) %>% 
       nest()
 
 # each entry of deaths.data$data is a dataframe, which is nested within the 
