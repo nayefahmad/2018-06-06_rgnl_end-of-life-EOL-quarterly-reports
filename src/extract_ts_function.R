@@ -4,8 +4,10 @@
 # FUNCTION TO EXTRACT DEATHS DATA FROM EACH COC AND CONVERT TO TIME SERIES       
 #*****************************************************
 
+# todo: add args to identify start datetime
+
 # Function defn: -----------------
-extract_deaths <- 
+extract_ts <- 
       function(df, colname){
             # df is a single entry (row) of the "data" col of a nested dataframe
             # colname: either "deaths" or "acute deaths" 
@@ -31,5 +33,5 @@ extract_deaths <-
 
 
 # test fn: 
-# extract_deaths(df1.deaths.data$data[[1]], "deaths") %>% 
-#       stl(s.window = "periodic")
+extract_ts(df1.deaths.data$data[[1]], "deaths") %>%
+      stl(s.window = "periodic")

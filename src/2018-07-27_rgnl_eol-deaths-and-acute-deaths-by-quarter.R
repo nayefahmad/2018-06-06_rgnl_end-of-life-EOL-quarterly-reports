@@ -71,21 +71,25 @@ df1.deaths.data %<>%
       # extract ts objects: 
       mutate(deaths.ts = map2(data,  # arg1
                               "deaths", # arg2
-                              extract_deaths),           # custom function for extracting deaths data as ts object 
+                              extract_ts),           # custom function for extracting deaths data as ts object 
              acutedeaths.ts = map2(data, 
                                    "acutedeaths", 
-                                   extract_deaths)) %>%  # custom function for extracting deaths data as ts object 
+                                   extract_ts), 
+             losdays.ts = map2(data, 
+                               "adjlosdays", 
+                               extract_ts)) %>%  # custom function for extracting deaths data as ts object 
       
       
       
       # run stl decompositions: 
       mutate(deaths.stl = map(deaths.ts, stl.fn),            # custom function for returning stl components as dataframe  
-             acutedeaths.stl = map(acutedeaths.ts, stl.fn))  # custom function for returning stl components as dataframe 
+             acutedeaths.stl = map(acutedeaths.ts, stl.fn), 
+             losdays.stl = map(losdays.ts, stl.fn))  # custom function for returning stl components as dataframe 
 
 # result: 
 df1.deaths.data$deaths.stl[[5]]
 df1.deaths.data$acutedeaths.stl[[5]]
-
+df1.deaths.data$losdays.stl[[5]]
 
 
 
