@@ -37,7 +37,9 @@ df2.targets <-
       read_csv(here("data", 
                     "2018-07-31_rgnl_eol-acute-deaths-percentage-targets.csv"))
 
-
+df3.los.targets <- 
+      read_csv(here("data", 
+                    "2018-08-02_rgnl_eol-acute-days-in-last-6-months-targets.csv"))
 
 
 
@@ -110,6 +112,7 @@ max.quarter <-  df3.quarters %>% filter(row_number() == nrow(df3.quarters)) %>% 
 
 # 5) plotting trend components: ---------------
 p1.trends <- 
+      # prep data: 
       unnest(df1.deaths.data, deaths.stl) %>% 
       as.data.frame() %>% 
       filter(!is.na(area)) %>% 
@@ -167,6 +170,7 @@ p1.trends <-
 
 # 6) plotting seasonal components: ---------------
 p2.seasonal <- 
+      # prep data: 
       unnest(df1.deaths.data, deaths.stl) %>% 
       as.data.frame() %>% 
       filter(!is.na(area)) %>% 
@@ -209,6 +213,7 @@ p2.seasonal <-
 
 # 7) plotting measure values: ----------------
 p3.measures.and.targets <- 
+      # prep data: 
       unnest(df1.deaths.data, data) %>% 
       filter(!is.na(area)) %>% 
       melt %>% 
@@ -249,6 +254,7 @@ p3.measures.and.targets <-
 # > VCH LEVEL GRAPH: ---------
 #******************************************************************
 p3.1.measures.and.targets.vch <- 
+      # prep data: 
       unnest(df1.deaths.data, data) %>% 
       filter(!is.na(area)) %>%
       group_by(quarter) %>%
@@ -292,11 +298,61 @@ p3.1.measures.and.targets.vch <-
 
 
 
+#**************************************************************************
+# 8) AVG ACUTE LOS DAYS IN LAST 6MONTHS OF LIFE : -------------------------
+#**************************************************************************
+
+p4.acute.losdays <- 
+      # prep data: 
+      unnest(df1.deaths.data, data) %>% 
+      select(-c(measure, target)) %>%  # remove "measure" and "target" cols for indicator "%acute deaths"
+      filter(!is.na(area)) %>% 
+      mutate(measure = round(adjlosdays/deaths, 2)) %>% 
+      inner_join(df3.los.targets) %>% 
+      melt() %>% 
+      filter(variable %in% c("measure", "target")) %>% 
+      
+      # plot data: 
+      ggplot(aes(x = quarter, 
+                 y = value, 
+                 group = variable)) + 
+      geom_line(aes(colour = variable), 
+                size = 1) + 
+      facet_wrap(~area) + 
+      
+      # scales: 
+      scale_colour_manual(values = c("firebrick",
+                                     "grey60")) + 
+      
+      expand_limits(y = 0) +  # display y-axis starting at 0, without specifying 
+
+      scale_x_discrete(breaks = c("14-Q1", 
+                                  "15-Q1", 
+                                  "16-Q1", 
+                                  "17-Q1", 
+                                  "18-Q1")) +
+      
+      # labs: 
+      labs(title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community \nprograms", 
+           subtitle = paste0(min.quarter, " to ", max.quarter), 
+           y = "proportion") + 
+      
+      guides(colour = guide_legend("")) +  # remove legend title
+      
+      theme_classic(base_size = 12); p4.acute.losdays      
+
+
+
+
+
+
+
+
 
 
 
 #**************************************************************************
-# 8) write outputs: -------------------------
+# 9) write outputs: -------------------------
 #**************************************************************************
 
 pdf(here("results", 
