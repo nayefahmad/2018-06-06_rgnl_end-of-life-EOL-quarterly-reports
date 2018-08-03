@@ -1,0 +1,7 @@
+SELECT        TOP (200) IndicatorSummaryFactID, EntityIndicatorID, FactDataRowTypeID, FullFiscalYear, FY_YTD, FQ1, FQ2, FQ3, FQ4, FP1, FP2, FP3, FP4, FP5, FP6, FP7, FP8, 
+                         FP9, FP10, FP11, FP12, FP13, CalendarYear, CY_YTD, CQ1, CQ2, CQ3, CQ4, CM1, CM2, CM3, CM4, CM5, CM6, CM7, CM8, CM9, CM10, CM11, CM12, 
+                         SpecialIndicator_DateRange, SpecialIndicator_DataValue, IndSummaryFactInternalNotes, IndicatorID, CreatedBy, CreatedDT, LastUpdatedBy, LastUpdatedDT
+
+
+FROM            BSI.IndicatorSummaryFact
+WHERE        (EntityIndicatorID IN (4545, 4546, 4547, 4548, 4549, 4557)) AND (FullFiscalYear = '2017/18')
