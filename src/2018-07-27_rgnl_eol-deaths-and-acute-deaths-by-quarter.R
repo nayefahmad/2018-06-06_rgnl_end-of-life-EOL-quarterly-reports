@@ -194,17 +194,23 @@ p2.seasonal <-
       as.data.frame() %>% 
       filter(!is.na(area)) %>% 
       
+      # join to get quarter numbers: 
+      inner_join(unnest(df1.deaths.data, data)) %>% 
+      
       # create plot: 
-      ggplot(aes(x = timeperiod, 
+      ggplot(aes(x = quarter, 
                  y = seasonal)) + 
       
       # deaths 
-      geom_line(aes(colour = "Deaths")) +  
+      geom_line(aes(colour = "Deaths", 
+                    group = 1)) +  
       
       # acute deaths: 
       geom_line(data = unnest(df1.deaths.data, acutedeaths.stl) %>% 
-                      filter(!is.na(area)), 
-                aes(colour = "Acute Deaths")) + 
+                      filter(!is.na(area)) %>% 
+                      inner_join(unnest(df1.deaths.data, data)), 
+                aes(colour = "Acute Deaths", 
+                    group = 1)) + 
       
       geom_hline(yintercept = 0, 
                  colour = "grey70", 
@@ -212,13 +218,12 @@ p2.seasonal <-
       
       facet_wrap(~area) + 
       
-      
+      scale_x_discrete(breaks = quarter.labels) + 
       scale_color_manual(values = c("red", "black")) + 
       labs(title = "Seasonal components of deaths and acute deaths, by COC",
            subtitle = paste0(min.quarter, " to ", max.quarter),
            y = "number of deaths", 
            x = "quarter") + 
-      scale_x_continuous(breaks = x.breaks) + 
       
       guides(colour = guide_legend("")) +  # remove legend title
       
@@ -417,19 +422,24 @@ p5.losdays.trend <-
       as.data.frame() %>% 
       filter(!is.na(area)) %>% 
       
+      # join to get quarter numbers: 
+      inner_join(unnest(df1.deaths.data, data)) %>% 
+      
       # plot data: 
       ggplot() + 
       
       # los trend
-      geom_line(aes(x = timeperiod, 
+      geom_line(aes(x = quarter, 
                     y = trend, 
-                    colour = "LOS days trend"), 
+                    colour = "LOS days trend", 
+                    group = 1), 
                 size = 1) +
       
       # los data: 
-      geom_line(aes(x = timeperiod, 
+      geom_line(aes(x = quarter, 
                     y = data, 
-                    colour = "LOS days"), 
+                    colour = "LOS days", 
+                    group = 1), 
                 size = 0.1) +
       
       facet_wrap(~area) + 
@@ -437,7 +447,7 @@ p5.losdays.trend <-
       
       scale_color_manual(values = c("grey80", 
                                     "black")) + 
-      scale_x_continuous(breaks = x.breaks) + 
+      scale_x_discrete(breaks = quarter.labels) + 
       
       labs(title = "Total hospital days in last 6 months of life, for clients known to \nVCH Community Programs",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
@@ -457,18 +467,22 @@ p6.losdays.seasonal <-
       as.data.frame() %>% 
       filter(!is.na(area)) %>% 
       
+      # join to get quarter numbers: 
+      inner_join(unnest(df1.deaths.data, data)) %>%
+      
       # plot data: 
       ggplot() + 
       
       # los trend
-      geom_line(aes(x = timeperiod, 
+      geom_line(aes(x = quarter, 
                     y = seasonal, 
-                    colour = "LOS days trend")) +
+                    colour = "LOS days trend",
+                    group = 1)) +
       
       facet_wrap(~area) + 
       
       scale_color_manual(values = c("black")) + 
-      scale_x_continuous(breaks = x.breaks) + 
+      scale_x_discrete(breaks = quarter.labels) + 
       geom_hline(yintercept = 0, 
                  colour = "grey70", 
                  size = 0.2) + 
@@ -509,7 +523,7 @@ pdf(here("results",
          "output from src", 
          "2018-08-02_rgnl_eol-reporting_los-days-in-acute-last-six-months.pdf"))
 p4.1.acute.losdays.measure.and.target.vch
-p4.acute.losdays
+p4.acute.losdays.measure.and.target
 p5.losdays.trend
 p6.losdays.seasonal
 dev.off()
