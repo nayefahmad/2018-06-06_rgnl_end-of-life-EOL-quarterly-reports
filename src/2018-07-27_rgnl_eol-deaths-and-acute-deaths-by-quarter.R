@@ -15,10 +15,12 @@ library("reshape2")
 # rm(list = ls())
 
 # todo: ----------------
-# > fix x-axis of graphs 
-# > create plot p3.1 ==> for VCH as a whole 
+# > fix x-axis of graphs p1, p2
+# > fix order of labels in legend 
+# > add data sources, key contacts 
 
-# 1) read in data: ----------------
+
+# 1) read in data and functions: ----------------
 source(here("src", 
             "extract_deaths_function.R"))
 source(here("src", 
@@ -153,7 +155,7 @@ p1.trends <-
                                     "black")) + 
       scale_x_continuous(breaks = x.breaks) + 
       
-      labs(title = "Trend components of deaths and acute deaths, by COC",
+      labs(title = "Deaths and acute deaths, by COC",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "number of deaths", 
            x = "quarter") + 
@@ -212,6 +214,7 @@ p3.measures.and.targets <-
       melt %>% 
       filter(variable %in% c("measure", "target")) %>% 
       
+      # plot data: 
       ggplot(aes(x = quarter, 
                  y = value, 
                  group = variable)) + 
@@ -232,7 +235,7 @@ p3.measures.and.targets <-
                                   "18-Q1")) +
       
       # labs: 
-      labs(title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community programs", 
+      labs(title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community \nprograms", 
            subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "proportion") + 
       
@@ -242,10 +245,48 @@ p3.measures.and.targets <-
       theme_classic(base_size = 12); p3.measures.and.targets
 
 
-
-
-
-
+#******************************************************************
+# > VCH LEVEL GRAPH: ---------
+#******************************************************************
+p3.1.measures.and.targets.vch <- 
+      unnest(df1.deaths.data, data) %>% 
+      filter(!is.na(area)) %>%
+      group_by(quarter) %>%
+      summarize(deaths = sum(deaths), 
+                acutedeaths = sum(acutedeaths)) %>% 
+      mutate(measure = round(acutedeaths/deaths, 2), 
+             area = "VCH") %>% 
+      inner_join(df2.targets) %>%
+      melt %>% 
+      filter(variable %in% c("measure", "target")) %>% 
+      
+      # plot
+      ggplot(aes(x = quarter, 
+                 y = value, 
+                 group = variable)) + 
+      geom_line(aes(colour = variable), 
+                size = 1) + 
+      
+      # scales: 
+      scale_colour_manual(values = c("dodgerblue",
+                                     "grey60")) + 
+      scale_y_continuous(limits = c(0, 1.0), 
+                         breaks = seq(0, 1, 0.1)) + 
+      scale_x_discrete(breaks = c("14-Q1", 
+                                  "15-Q1", 
+                                  "16-Q1", 
+                                  "17-Q1", 
+                                  "18-Q1")) +
+      
+      # labs: 
+      labs(title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community \nprograms", 
+           subtitle = paste0(min.quarter, " to ", max.quarter, " for VCH as a whole"), 
+           y = "proportion") + 
+      
+      guides(colour = guide_legend("")) +  # remove legend title
+      
+      
+      theme_classic(base_size = 12); p3.1.measures.and.targets.vch
 
 
 
@@ -260,7 +301,9 @@ p3.measures.and.targets <-
 
 pdf(here("results", 
             "output from src", 
-            "2018-07-31_rgnl_eol-deaths-trend-and-seasonal-components.pdf"))
+            "2018-08-02_rgnl_eol-reporting_percent-hospital-deaths.pdf"))
+p3.1.measures.and.targets.vch
+p3.measures.and.targets
 p1.trends
 p2.seasonal
 dev.off()
