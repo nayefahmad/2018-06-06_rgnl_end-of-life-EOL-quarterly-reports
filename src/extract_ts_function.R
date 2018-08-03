@@ -8,9 +8,11 @@
 
 # Function defn: -----------------
 extract_ts <- 
-      function(df, colname){
+      function(df, colname, startyear=2014, startquarter=1){
             # df is a single entry (row) of the "data" col of a nested dataframe
             # colname: either "deaths" or "acute deaths" 
+            # startyear: eg. "2014"
+            # startquarter: e.g. "1"
             
             # output: ts object with deaths data for specified area 
             
@@ -22,7 +24,7 @@ extract_ts <-
                   select(glue("{colname}")) %>% 
                   unlist() %>% 
                   as.numeric() %>% 
-                  ts(start = c(2014, 1), 
+                  ts(start = c(startyear, startquarter), 
                      frequency = 4)
             
             # str(deaths.ts)
@@ -32,6 +34,14 @@ extract_ts <-
 
 
 
-# test fn: 
+# test fn: -----------
+# extract_ts(df1.deaths.data$data[[1]], "deaths") 
+# 
+# # try different start period: 
+# extract_ts(df1.deaths.data$data[[1]], 
+#            "deaths", 
+#            2015, 
+#            4) 
+# 
 # extract_ts(df1.deaths.data$data[[1]], "deaths") %>%
 #       stl(s.window = "periodic")
