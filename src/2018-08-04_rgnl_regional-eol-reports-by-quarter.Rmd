@@ -1,0 +1,71 @@
+---
+title: "Regional EOL Reporting"
+author: "VCH Decision Support"
+date: "August 3, 2018"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE)
+
+library("here")
+
+# rm(list = ls())
+
+# todo: -------------
+# > write function to pull data from CommunityMart EOLView, save as df1.deaths.data 
+
+
+
+# set parameters??: --------------
+# ??
+
+
+# import data, plots: ------------
+source(here("src", 
+            "2018-08-03_rgnl_graphs-regional-eol-reports-by-quarter.R"))
+
+```
+
+## Regional End of Life Reporting 
+
+```{r }
+
+ggarrange(p3.1.measures.and.targets.vch, 
+          p3.measures.and.targets + theme(plot.margin = unit(c(2,0.5,0.5,0.5), "cm")), 
+          nrow = 2)
+
+```
+
+
+
+## Regional End of Life Reporting 
+
+```{r }
+
+p1.trends
+
+```
+
+
+## Regional End of Life Reporting 
+
+```{r }
+
+p2.seasonal
+```
+
+
+## Regional End of Life Reporting 
+
+```{r }
+ggarrange(p4.1.acute.losdays.measure.and.target.vch, 
+          p4.acute.losdays.measure.and.target + 
+                theme(plot.margin = unit(c(2,0.5,0.5,0.5), "cm")), 
+          nrow = 2)
+
+
+
+```
+
