@@ -43,7 +43,7 @@ from(
 	where 1=1 
 		and IsKnownToCommunity = 1
 		--and CommunityRegion2 <> ' '			-- params: select area
-		and DeathFiscalQuarter between '14-Q1' and '18-Q1' 
+		and DeathFiscalQuarter between '14-Q1' and '18-Q4' 
 	group by DeathFiscalQuarter 
 		, CommunityRegion2
 	) as sub
