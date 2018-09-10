@@ -163,11 +163,7 @@ p3.measures.and.targets <-
                                      "dodgerblue")) + 
       scale_y_continuous(limits = c(0, 1.0), 
                          breaks = seq(0, 1, 0.2)) + 
-      scale_x_discrete(breaks = c("14-Q1", 
-                                  "15-Q1", 
-                                  "16-Q1", 
-                                  "17-Q1", 
-                                  "18-Q1")) +
+      scale_x_discrete(breaks = quarter.labels) +
       
       # labs: 
       labs(# title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community \nprograms", 
@@ -269,7 +265,9 @@ p4.acute.losdays.measure.and.target <-
       
       guides(colour = guide_legend("")) +  # remove legend title
       
-      theme_classic(base_size = 12); p4.acute.losdays.measure.and.target
+      theme_classic(base_size = 12) + 
+      theme(plot.caption = element_text(size = 8),
+            axis.text.x = element_text(angle = 90)); p4.acute.losdays.measure.and.target
 
 
 
@@ -302,8 +300,8 @@ p4.1.acute.losdays.measure.and.target.vch <-
       scale_x_discrete(breaks = quarter.labels) +
       
       # labs: 
-      labs(title = "Regional End of Life Reporting \nAverage hospital days in the last 6 months of life for clients known to \nVCH Community Programs", 
-           subtitle = paste0(min.quarter, " to ", max.quarter, " for VCH as a whole"), 
+      labs(title = "Average hospital days in the last 6 months of life for clients known to \nVCH Community Programs \n\nVCH Overall", 
+           subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "proportion") + 
       
       guides(colour = guide_legend("")) +  # remove legend title

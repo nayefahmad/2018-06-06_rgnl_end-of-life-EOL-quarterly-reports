@@ -1,0 +1,11 @@
+SELECT        TOP (200) IndicatorID, IndicatorCode, PBRptIndShortName, PBRptIndLongName, PBRptIndDefinition_WhatWeMeasure, PBRptPerformanceAndTargetNotes, 
+                         PBRptTimeFrameText, PBRptTargetLegend, PBRptXAxisLabel, PBRptYAxisLabel, PBRptGraphID, PBRptGraphDataAxisStart, PBRptGraphDataAxisEnd, 
+                         PBRptFrequencyID, PBRptIndicatorRuleID, PBRptSparklineGraphID, SETRptIndShortName, SETRptIndLongName, SETRptIndDefinition_WhatWeMeasure, 
+                         SETRptPerformanceAndTargetNotes, SETRptTimeFrameText, SETRptTargetLegend, SETRptXAxisLabel, SETRptYAxisLabel, SETRptGraphID, 
+                         SETRptGraphDataAxisStart, SETRptGraphDataAxisEnd, SETRptTrellisGraphDataAxisStart, SETRptTrellisGraphDataAxisEnd, SETRptFrequencyID, 
+                         SETRptIndicatorRuleID, SETRptSparklineGraphID, SETRptIndicatorComments, SETRptIndCommentsUpdatedDT, AnswerToQ6_Why, AnswerToQ7_HowWeMeasureIt, 
+                         AnswerToQ8_HowAreWeDoing, AnswerToQ9_WhatWeAreDoing, AnswerToQ10_WhatCanYouDo, ParentIndicatorID, DisplayValuePrefix, DisplayValueSuffix, 
+                         TargetDirection, Flag2HideDisplayTargetDirection, IndicatorRate, CreatedBy, CreatedDT, LastUpdatedBy, LastUpdatedDT, IndicatorInternalNotes, 
+                         SETRptInd_HowTargetDetermined, NoOfRecordsToDisplay, DisplayValueFormatId
+FROM            Dim.Indicator
+WHERE        (IndicatorID IN (545, 546))
