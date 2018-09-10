@@ -110,6 +110,10 @@ x.breaks <-
 
 quarter.labels <- unnest(df1.deaths.data, data) %>% select(quarter) %>% as.data.frame()
 quarter.labels <- quarter.labels[c(1, x.breaks+1), ]
+# slice of last quarter to prevent recycling: 
+quarter.labels <- quarter.labels[1:length(quarter.labels) - 1]
+
+
 
 # next find min and max quarter for subtitle: 
 df3.quarters <- 
