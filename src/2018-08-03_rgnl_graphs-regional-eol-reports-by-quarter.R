@@ -6,6 +6,7 @@
 #*******************************************************
 
 library("here")
+library("ggpubr")
 
 # rm(list = ls())
 
@@ -13,6 +14,9 @@ library("here")
 source(here("src", 
             "2018-07-27_rgnl_eol-deaths-and-acute-deaths-by-quarter.R"))
 
+
+# todo: ---------
+# > captions, fix axis of p2, onwards, capitalize axis title
 
 
 #******************************************************
@@ -71,17 +75,20 @@ p1.trends <-
       # scaless:
       scale_color_manual(values = c("lightpink", 
                                     "red", 
-                                    "grey80", 
+                                    "grey70", 
                                     "black")) + 
       scale_x_discrete(breaks = quarter.labels) + 
       
       labs(title = "Deaths and acute deaths, by COC",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
-           y = "number of deaths", 
-           x = "quarter") + 
+           y = "Number of deaths", 
+           x = "Quarter", 
+           caption = paste0("Data Sources: VCH Decision Support DAD (ADRMart), ED (EDMart), PARIS (CommunityMart) Data Views\n", "Extracted ", Sys.Date(), "\nReport Contact: kenneth.hawkins@vch.ca")) + 
       guides(colour = guide_legend("")) +  # remove legend title
       
-      theme_classic(base_size = 12); p1.trends
+      theme_classic(base_size = 12) + 
+      theme(plot.caption = element_text(size = 8),
+            axis.text.x = element_text(angle = 90)); p1.trends
 
 
 
@@ -148,13 +155,14 @@ p3.measures.and.targets <-
       geom_line(aes(colour = variable), 
                 size = 1) + 
       
-      facet_wrap(~area) + 
+      facet_wrap(~area, 
+                 nrow = 1) + 
       
       # scales: 
       scale_colour_manual(values = c("grey60",
                                      "dodgerblue")) + 
       scale_y_continuous(limits = c(0, 1.0), 
-                         breaks = seq(0, 1, 0.1)) + 
+                         breaks = seq(0, 1, 0.2)) + 
       scale_x_discrete(breaks = c("14-Q1", 
                                   "15-Q1", 
                                   "16-Q1", 
@@ -162,14 +170,17 @@ p3.measures.and.targets <-
                                   "18-Q1")) +
       
       # labs: 
-      labs(title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community \nprograms", 
-           subtitle = paste0(min.quarter, " to ", max.quarter), 
-           y = "proportion") + 
+      labs(# title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community \nprograms", 
+           # subtitle = paste0(min.quarter, " to ", max.quarter), 
+           y = "Proportion", 
+           x = "Quarter") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
       
       
-      theme_classic(base_size = 12); p3.measures.and.targets
+      theme_classic(base_size = 12) + 
+      theme(plot.caption = element_text(size = 8),
+            axis.text.x = element_text(angle = 90)); p3.measures.and.targets
 
 
 #******************************************************************
@@ -186,6 +197,8 @@ p3.1.measures.and.targets.vch <-
              area = "VCH") %>% 
       inner_join(df2.targets) %>%
       melt %>% 
+      mutate(variable = factor(variable, 
+                               levels = c("target", "measure"))) %>% 
       filter(variable %in% c("measure", "target")) %>% 
       
       # plot
@@ -196,20 +209,17 @@ p3.1.measures.and.targets.vch <-
                 size = 1) + 
       
       # scales: 
-      scale_colour_manual(values = c("dodgerblue",
-                                     "grey60")) + 
+      scale_colour_manual(values = c("grey60", 
+                                     "dodgerblue")) + 
       scale_y_continuous(limits = c(0, 1.0), 
-                         breaks = seq(0, 1, 0.1)) + 
-      scale_x_discrete(breaks = c("14-Q1", 
-                                  "15-Q1", 
-                                  "16-Q1", 
-                                  "17-Q1", 
-                                  "18-Q1")) +
+                         breaks = seq(0, 1, 0.2)) + 
+      scale_x_discrete(breaks = quarter.labels) + 
       
       # labs: 
-      labs(title = "Regional End of Life Reporting \n% of overall hospital deaths for clients known to VCH Community \nprograms", 
-           subtitle = paste0(min.quarter, " to ", max.quarter, " for VCH as a whole"), 
-           y = "proportion") + 
+      labs(title = "Percentage of overall hospital deaths for clients known to VCH Community \nprograms \n\nVCH Overall", 
+           subtitle = paste0(min.quarter, " to ", max.quarter), 
+           y = "Proportion", 
+           x = "Quarter") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
       
@@ -240,7 +250,8 @@ p4.acute.losdays.measure.and.target <-
                  group = variable)) + 
       geom_line(aes(colour = variable), 
                 size = 1) + 
-      facet_wrap(~area) + 
+      facet_wrap(~area, 
+                 nrow = 1) + 
       
       # scales: 
       scale_colour_manual(values = c("firebrick",
@@ -248,16 +259,13 @@ p4.acute.losdays.measure.and.target <-
       
       expand_limits(y = 0) +  # display y-axis starting at 0, without specifying max
       
-      scale_x_discrete(breaks = c("14-Q1", 
-                                  "15-Q1", 
-                                  "16-Q1", 
-                                  "17-Q1", 
-                                  "18-Q1")) +
+      scale_x_discrete(breaks = quarter.labels) +
       
       # labs: 
-      labs(title = "Regional End of Life Reporting \nAverage hospital days in the last 6 months of life for clients known to \nVCH Community Programs", 
-           subtitle = paste0(min.quarter, " to ", max.quarter), 
-           y = "proportion") + 
+      labs(# title = "Regional End of Life Reporting \nAverage hospital days in the last 6 months of life for clients known to \nVCH Community Programs", 
+           # subtitle = paste0(min.quarter, " to ", max.quarter), 
+           y = "Proportion", 
+           x = "Quarter") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
       
@@ -291,11 +299,7 @@ p4.1.acute.losdays.measure.and.target.vch <-
                                      "grey60")) + 
       expand_limits(y = 0) +  # display y-axis starting at 0, without specifying max
       
-      scale_x_discrete(breaks = c("14-Q1", 
-                                  "15-Q1", 
-                                  "16-Q1", 
-                                  "17-Q1", 
-                                  "18-Q1")) +
+      scale_x_discrete(breaks = quarter.labels) +
       
       # labs: 
       labs(title = "Regional End of Life Reporting \nAverage hospital days in the last 6 months of life for clients known to \nVCH Community Programs", 
@@ -408,9 +412,10 @@ p6.losdays.seasonal <-
 
 pdf(here("results", 
          "output from src", 
-         "2018-08-02_rgnl_eol-reporting_percent-hospital-deaths.pdf"))
-p3.1.measures.and.targets.vch
-p3.measures.and.targets
+         "2018-08-09_rgnl_eol-reporting_percent-hospital-deaths.pdf"))
+ggarrange(p3.1.measures.and.targets.vch, 
+          p3.measures.and.targets + theme(plot.margin = unit(c(2,0.5,0.5,0.5), "cm")), 
+          nrow = 2)
 p1.trends
 p2.seasonal
 dev.off()
@@ -419,11 +424,12 @@ dev.off()
 
 pdf(here("results", 
          "output from src", 
-         "2018-08-02_rgnl_eol-reporting_los-days-in-acute-last-six-months.pdf"))
+         "2018-08-09_rgnl_eol-reporting_los-days-in-acute-last-six-months.pdf"))
 p4.1.acute.losdays.measure.and.target.vch
 p4.acute.losdays.measure.and.target
 p5.losdays.trend
 p6.losdays.seasonal
 dev.off()
+
 
 

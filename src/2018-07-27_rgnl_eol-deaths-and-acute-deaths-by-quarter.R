@@ -16,9 +16,10 @@ library("reshape2")
 
 # todo: ----------------
 # > fix x-axis of graphs p1, p2, p5, p6
-# > fix order of labels in legend 
+# > fix order of labels in legend + capitalize "Measure" and "target" 
 # > add data sources, key contacts as captions 
-# > parametrize start year and quarter (hardcoded to 2014, 1 for now in extract_ts() fn)
+# > parametrize start year and quarter ==> will be passed to extract_ts( ) fn 
+# > parametrize date of report preparation in caption of graphs 
 
 
 # 1) read in data and functions: ----------------

@@ -15,6 +15,7 @@ library("here")
 
 # todo: -------------
 # > write function to pull data from CommunityMart EOLView, save as df1.deaths.data 
+# > add image of data dictionary to end of report 
 
 
 
