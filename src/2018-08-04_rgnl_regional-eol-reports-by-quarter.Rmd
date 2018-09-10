@@ -16,6 +16,9 @@ library("here")
 # todo: -------------
 # > write function to pull data from CommunityMart EOLView, save as df1.deaths.data 
 # > add image of data dictionary to end of report 
+# > add data sources caption to all plots 
+# > fix colours of lines, etc. 
+# > y-axis title for graphs 4, 4.1: should be avg days
 
 
 
@@ -35,7 +38,11 @@ source(here("src",
 
 ggarrange(p3.1.measures.and.targets.vch, 
           p3.measures.and.targets + theme(plot.margin = unit(c(2,0.5,0.5,0.5), "cm")), 
-          nrow = 2)
+          nrow = 2) %>% 
+      
+      annotate_figure(bottom = text_grob("\nData source: ", 
+                                         hjust = 1, 
+                                         x = 1)) 
 
 ```
 
@@ -66,6 +73,25 @@ ggarrange(p4.1.acute.losdays.measure.and.target.vch,
                 theme(plot.margin = unit(c(2,0.5,0.5,0.5), "cm")), 
           nrow = 2)
 
+
+
+```
+
+
+
+## Regional End of Life Reporting 
+
+```{r}
+p5.losdays.trend
+
+
+```
+
+
+## Regional End of Life Reporting 
+
+```{r}
+p6.losdays.seasonal
 
 
 ```
