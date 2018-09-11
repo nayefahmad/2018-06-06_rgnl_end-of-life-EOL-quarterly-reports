@@ -12,6 +12,9 @@ library("reshape2")
 # rm(list = ls())
 
 # 1) NOTES: ---------------
+
+# THIS SCRIPT IS NO LONGER IN USE ------------------------
+
 # see folder: \\vch.ca\departments\QUIST\Production\Pegah Mortazavi\EndOfLife\Regional EndOfLifeReporting\Quarterly
 #       file: 2018-07-17_Q4_EndOfLifeReporting.xlsx
 
@@ -22,7 +25,6 @@ library("reshape2")
 
 
 # TODO: -------------
-# > Extract all COC trend components, plot on single graph  
 
 
 # 2) deaths data: --------------
