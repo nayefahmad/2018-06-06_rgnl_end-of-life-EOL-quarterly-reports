@@ -82,8 +82,7 @@ p1.trends <-
       labs(title = "Deaths and acute deaths, by COC",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "Number of deaths", 
-           x = "Quarter", 
-           caption = paste0("Data Sources: VCH Decision Support DAD (ADRMart), ED (EDMart), PARIS (CommunityMart) Data Views\n", "Extracted ", Sys.Date(), "\nReport Contact: kenneth.hawkins@vch.ca")) + 
+           x = "Quarter") + 
       guides(colour = guide_legend("")) +  # remove legend title
       
       theme_classic(base_size = 12) + 
@@ -127,7 +126,7 @@ p2.seasonal <-
       scale_color_manual(values = c("red", "black")) + 
       labs(title = "Seasonal components of deaths and acute deaths, by COC",
            subtitle = paste0(min.quarter, " to ", max.quarter),
-           y = "number of deaths", 
+           y = "Number of deaths", 
            x = "quarter") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
@@ -212,7 +211,7 @@ p3.1.measures.and.targets.vch <-
       scale_x_discrete(breaks = quarter.labels) + 
       
       # labs: 
-      labs(title = "Percentage of overall hospital deaths for clients known to VCH Community \nprograms \n\nVCH Overall", 
+      labs(title = "Percentage of overall hospital deaths for clients known to VCH Community programs \n\nVCH Overall", 
            subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "Proportion", 
            x = "Quarter") + 
@@ -237,8 +236,10 @@ p4.acute.losdays.measure.and.target <-
       filter(!is.na(area)) %>% 
       mutate(measure = round(adjlosdays/deaths, 2)) %>% 
       inner_join(df3.los.targets) %>% 
+      rename(Measure = measure, 
+             Target = target) %>% 
       melt() %>% 
-      filter(variable %in% c("measure", "target")) %>% 
+      filter(variable %in% c("Measure", "Target")) %>% 
       
       # plot data: 
       ggplot(aes(x = quarter, 
@@ -250,7 +251,7 @@ p4.acute.losdays.measure.and.target <-
                  nrow = 1) + 
       
       # scales: 
-      scale_colour_manual(values = c("firebrick",
+      scale_colour_manual(values = c("dodgerblue",
                                      "grey60")) + 
       
       expand_limits(y = 0) +  # display y-axis starting at 0, without specifying max
@@ -260,7 +261,7 @@ p4.acute.losdays.measure.and.target <-
       # labs: 
       labs(# title = "Regional End of Life Reporting \nAverage hospital days in the last 6 months of life for clients known to \nVCH Community Programs", 
            # subtitle = paste0(min.quarter, " to ", max.quarter), 
-           y = "Proportion", 
+           y = "Number of days", 
            x = "Quarter") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
@@ -282,8 +283,10 @@ p4.1.acute.losdays.measure.and.target.vch <-
       mutate(measure = round(losdays/deaths, 2), 
              area = "VCH") %>% 
       inner_join(df3.los.targets) %>%
+      rename(Measure = measure, 
+             Target = target) %>% 
       melt %>% 
-      filter(variable %in% c("measure", "target")) %>% 
+      filter(variable %in% c("Measure", "Target")) %>% 
       
       # plot
       ggplot(aes(x = quarter, 
@@ -293,7 +296,7 @@ p4.1.acute.losdays.measure.and.target.vch <-
                 size = 1) + 
       
       # scales: 
-      scale_colour_manual(values = c("firebrick",
+      scale_colour_manual(values = c("dodgerblue", 
                                      "grey60")) + 
       expand_limits(y = 0) +  # display y-axis starting at 0, without specifying max
       
@@ -302,7 +305,7 @@ p4.1.acute.losdays.measure.and.target.vch <-
       # labs: 
       labs(title = "Average hospital days in the last 6 months of life for clients known to \nVCH Community Programs \n\nVCH Overall", 
            subtitle = paste0(min.quarter, " to ", max.quarter), 
-           y = "proportion") + 
+           y = "Number of days") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
       
@@ -351,7 +354,7 @@ p5.losdays.trend <-
       
       labs(title = "Total hospital days in last 6 months of life, for clients known to \nVCH Community Programs",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
-           y = "number of days", 
+           y = "Number of days", 
            x = "quarter") + 
       guides(colour = guide_legend("")) +  # remove legend title
       
@@ -390,7 +393,7 @@ p6.losdays.seasonal <-
       
       labs(title = "Seasonal component of total hospital days in last 6 months of life \nfor clients known to VCH Community Programs",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
-           y = "number of days", 
+           y = "Number of days", 
            x = "quarter") + 
       guides(colour = guide_legend("")) +  # remove legend title
       

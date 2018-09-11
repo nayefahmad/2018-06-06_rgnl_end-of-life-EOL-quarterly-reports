@@ -15,10 +15,9 @@ library("here")
 
 # todo: -------------
 # > write function to pull data from CommunityMart EOLView, save as df1.deaths.data 
-# > add image of data dictionary to end of report 
-# > add data sources caption to all plots 
+# > add higher quality image of data dictionary to end of report 
 # > fix colours of lines, etc. 
-# > y-axis title for graphs 4, 4.1: should be avg days
+# > fix capitalization, levels of "Measure" and "Target"
 
 
 
@@ -40,9 +39,10 @@ ggarrange(p3.1.measures.and.targets.vch,
           p3.measures.and.targets + theme(plot.margin = unit(c(2,0.5,0.5,0.5), "cm")), 
           nrow = 2) %>% 
       
-      annotate_figure(bottom = text_grob("\nData source: ", 
+      annotate_figure(bottom = text_grob(paste0("\nData Sources: VCH Decision Support DAD (ADRMart), ED (EDMart), PARIS (CommunityMart) Data Views\n", "Prepared ", Sys.Date(), "\nReport Contact: kenneth.hawkins@vch.ca"), 
                                          hjust = 1, 
-                                         x = 1)) 
+                                         x = 1, 
+                                         size = 8)) 
 
 ```
 
@@ -51,8 +51,8 @@ ggarrange(p3.1.measures.and.targets.vch,
 ## Regional End of Life Reporting 
 
 ```{r }
-
 p1.trends
+
 
 ```
 
@@ -71,9 +71,12 @@ p2.seasonal
 ggarrange(p4.1.acute.losdays.measure.and.target.vch, 
           p4.acute.losdays.measure.and.target + 
                 theme(plot.margin = unit(c(2,0.5,0.5,0.5), "cm")), 
-          nrow = 2)
-
-
+          nrow = 2) %>% 
+      
+      annotate_figure(bottom = text_grob(paste0("\nData Sources: VCH Decision Support DAD (ADRMart), ED (EDMart), PARIS (CommunityMart) Data Views\n", "Prepared ", Sys.Date(), "\nReport Contact: kenneth.hawkins@vch.ca"), 
+                                         hjust = 1, 
+                                         x = 1, 
+                                         size = 8))
 
 ```
 
@@ -95,4 +98,10 @@ p6.losdays.seasonal
 
 
 ```
+
+
+
+## Regional End of Life Reporting 
+
+![](2018-09-10_data-dictionary.jpg)
 
