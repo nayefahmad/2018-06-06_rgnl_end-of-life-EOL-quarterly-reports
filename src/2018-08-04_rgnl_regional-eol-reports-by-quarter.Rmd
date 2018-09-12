@@ -18,6 +18,8 @@ library("here")
 # > add higher quality image of data dictionary to end of report 
 # > fix colours of lines, etc. 
 # > fix capitalization, levels of "Measure" and "Target"
+# > remove "Figure 1 label on last page"
+# > change proportion to percentage
 
 
 
