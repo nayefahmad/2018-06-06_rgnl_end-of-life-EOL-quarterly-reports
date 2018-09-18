@@ -1,8 +1,11 @@
 ---
 title: "Regional EOL Reporting"
 author: "VCH Decision Support"
-date: "August 3, 2018"
-output: beamer_presentation
+date: "September 18, 2018"
+output: 
+  beamer_presentation: 
+    fig_caption: false
+            
 ---
 
 ```{r setup, include=FALSE}
@@ -17,8 +20,6 @@ library("here")
 # > write function to pull data from CommunityMart EOLView, save as df1.deaths.data 
 # > add higher quality image of data dictionary to end of report 
 # > fix colours of lines, etc. 
-# > fix capitalization, levels of "Measure" and "Target"
-# > remove "Figure 1 label on last page"
 # > change proportion to percentage
 
 

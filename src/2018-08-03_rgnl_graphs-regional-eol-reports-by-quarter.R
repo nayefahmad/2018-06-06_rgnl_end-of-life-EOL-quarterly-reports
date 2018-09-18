@@ -73,9 +73,9 @@ p1.trends <-
       
       
       # scaless:
-      scale_color_manual(values = c("lightpink", 
-                                    "red", 
-                                    "grey70", 
+      scale_color_manual(values = c("slategray2", 
+                                    "dodgerblue3", 
+                                    "grey80", 
                                     "black")) + 
       scale_x_discrete(breaks = quarter.labels) + 
       
@@ -123,11 +123,11 @@ p2.seasonal <-
       facet_wrap(~area) + 
       
       scale_x_discrete(breaks = quarter.labels) + 
-      scale_color_manual(values = c("red", "black")) + 
+      scale_color_manual(values = c("dodgerblue2", "black")) + 
       labs(title = "Seasonal components of deaths and acute deaths, by COC",
            subtitle = paste0(min.quarter, " to ", max.quarter),
            y = "Number of deaths", 
-           x = "quarter") + 
+           x = "Quarter") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
       
@@ -142,10 +142,14 @@ p2.seasonal <-
 # 3) plotting measure values: % acute deaths ----------------
 p3.measures.and.targets <- 
       # prep data: 
-      unnest(df1.deaths.data, data) %>% 
+      unnest(df1.deaths.data, data) %>% # as.data.frame
       filter(!is.na(area)) %>% 
+      rename(Measure = measure, 
+             Target = target) %>% 
       melt %>% 
-      filter(variable %in% c("measure", "target")) %>% 
+      filter(variable %in% c("Measure", "Target")) %>% 
+      mutate(variable = factor(variable, 
+                               levels = c("Target", "Measure"))) %>% 
       
       # plot data: 
       ggplot(aes(x = quarter, 
@@ -191,10 +195,12 @@ p3.1.measures.and.targets.vch <-
       mutate(measure = round(acutedeaths/deaths, 2), 
              area = "VCH") %>% 
       inner_join(df2.targets) %>%
+      rename(Measure = measure, 
+             Target = target) %>% 
       melt %>% 
       mutate(variable = factor(variable, 
-                               levels = c("target", "measure"))) %>% 
-      filter(variable %in% c("measure", "target")) %>% 
+                               levels = c("Target", "Measure"))) %>% 
+      filter(variable %in% c("Measure", "Target")) %>% 
       
       # plot
       ggplot(aes(x = quarter, 
@@ -239,6 +245,8 @@ p4.acute.losdays.measure.and.target <-
       rename(Measure = measure, 
              Target = target) %>% 
       melt() %>% 
+      mutate(variable = factor(variable, 
+                               levels = c("Target", "Measure"))) %>% 
       filter(variable %in% c("Measure", "Target")) %>% 
       
       # plot data: 
@@ -251,8 +259,8 @@ p4.acute.losdays.measure.and.target <-
                  nrow = 1) + 
       
       # scales: 
-      scale_colour_manual(values = c("dodgerblue",
-                                     "grey60")) + 
+      scale_colour_manual(values = c("grey60",
+                                     "dodgerblue")) + 
       
       expand_limits(y = 0) +  # display y-axis starting at 0, without specifying max
       
@@ -286,6 +294,8 @@ p4.1.acute.losdays.measure.and.target.vch <-
       rename(Measure = measure, 
              Target = target) %>% 
       melt %>% 
+      mutate(variable = factor(variable, 
+                               levels = c("Target", "Measure"))) %>% 
       filter(variable %in% c("Measure", "Target")) %>% 
       
       # plot
@@ -296,8 +306,8 @@ p4.1.acute.losdays.measure.and.target.vch <-
                 size = 1) + 
       
       # scales: 
-      scale_colour_manual(values = c("dodgerblue", 
-                                     "grey60")) + 
+      scale_colour_manual(values = c("grey60",
+                                     "dodgerblue")) + 
       expand_limits(y = 0) +  # display y-axis starting at 0, without specifying max
       
       scale_x_discrete(breaks = quarter.labels) +
@@ -305,7 +315,8 @@ p4.1.acute.losdays.measure.and.target.vch <-
       # labs: 
       labs(title = "Average hospital days in the last 6 months of life for clients known to \nVCH Community Programs \n\nVCH Overall", 
            subtitle = paste0(min.quarter, " to ", max.quarter), 
-           y = "Number of days") + 
+           y = "Number of days", 
+           x = "Quarter") + 
       
       guides(colour = guide_legend("")) +  # remove legend title
       
@@ -355,7 +366,7 @@ p5.losdays.trend <-
       labs(title = "Total hospital days in last 6 months of life, for clients known to \nVCH Community Programs",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "Number of days", 
-           x = "quarter") + 
+           x = "Quarter") + 
       guides(colour = guide_legend("")) +  # remove legend title
       
       theme_classic(base_size = 12); p5.losdays.trend
@@ -394,7 +405,7 @@ p6.losdays.seasonal <-
       labs(title = "Seasonal component of total hospital days in last 6 months of life \nfor clients known to VCH Community Programs",
            subtitle = paste0(min.quarter, " to ", max.quarter), 
            y = "Number of days", 
-           x = "quarter") + 
+           x = "Quarter") + 
       guides(colour = guide_legend("")) +  # remove legend title
       
       theme_classic(base_size = 12); p6.losdays.seasonal
