@@ -30,18 +30,23 @@ from [CommunityMart].[dbo].[vwEndOfLife]
 
 
 -- group by quarter 
-select CommunityRegion2
-	 ,DeathFiscalQuarter 
-	, count(patientID) as Deaths 
-	, sum(cast(isdeathinacute as int)) as AcuteDeaths
-	, sum(dadacutedaylast6month) as AdjLOSDays
-from #deathsInAcute
-where 1=1 
-	and IsKnownToCommunity = 1
-	--and CommunityRegion2 <> ' '			-- params: select area
-	and DeathFiscalQuarter between '14-Q1' and '18-Q4' 
-group by DeathFiscalQuarter 
-	, CommunityRegion2
+select *
+	--, ((AcuteDeaths*1.0)/Deaths) * 100 as reportedMeasure   --todo: for some reason division give inaccurate result :/
+from(
+
+	select CommunityRegion2
+		 ,DeathFiscalQuarter 
+		, count(patientID) as Deaths 
+		, sum(cast(isdeathinacute as int)) as AcuteDeaths
+		, sum(dadacutedaylast6month) as AdjLOSDays
+	from #deathsInAcute
+	where 1=1 
+		and IsKnownToCommunity = 1
+		--and CommunityRegion2 <> ' '			-- params: select area
+		and DeathFiscalQuarter between '14-Q1' and '18-Q4' 
+	group by DeathFiscalQuarter 
+		, CommunityRegion2
+	) as sub
 order by CommunityRegion2
 	 , DeathFiscalQuarter; 
 
